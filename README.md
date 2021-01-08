@@ -1,8 +1,37 @@
 # AssociatedScope
+###Preloadable and reusable ActiveRecord scope
 
-Welcome to your new gem! In this directory, you'll find the files you need to be able to package up your Ruby library into a gem. Put your Ruby code in the file `lib/associated_scope`. To experiment with that code, run `bin/console` for an interactive prompt.
+Associated scope allow to define ActiveRecord associations outside models as extention to an existing model associations.
 
-TODO: Delete this and the text above, and describe your gem
+```ruby
+class Post < ApplicationRecord
+  has_many :comments
+end
+
+module TopComments
+  include AssociatedScope
+  
+  associated_scope :top_comments, -> { rated.order('score DESC') }, source: :comments
+end
+
+class HomeController < ApplicationController
+  def index
+    @posts = Post.recent.preload(:top_comments).extending(TopComments)
+  end
+end
+
+# home.html.erb
+<% @posts.each do |post| %>
+  <% post.top_comments.each {...} %>
+<% end %>
+```
+
+#### WHY
+Solving N+1 queries for custom scopes might be a complicated task. Same time ActiveRecord has a built in preloader.
+
+#### WHAT
+AssociatedScope allow to define preloadable association with a scope.
+
 
 ## Installation
 
@@ -21,18 +50,48 @@ Or install it yourself as:
     $ gem install associated_scope
 
 ## Usage
+define a module as:
+```ruby
+class TopComments
+  include AssociatedScope
+  
+  associated_scope :top_comments, -> { rated.order('score DESC') }, source: :comments
+end
+```
 
-TODO: Write usage instructions here
+`associated_scope <new association name>, <scope as lambda>, source: <base association>`
 
-## Development
+extend relation with `.extending(<module>)`
 
-After checking out the repo, run `bin/setup` to install dependencies. Then, run `rake spec` to run the tests. You can also run `bin/console` for an interactive prompt that will allow you to experiment.
+#### Helper methods
 
-To install this gem onto your local machine, run `bundle exec rake install`. To release a new version, update the version number in `version.rb`, and then run `bundle exec rake release`, which will create a git tag for the version, push git commits and tags, and push the `.gem` file to [rubygems.org](https://rubygems.org).
+Methods can be added to the target model as:
+```ruby
+class TopComments
+  include AssociatedScope
+  
+  associated_scope :top_comments, -> { rated.order('score DESC') }, source: :comments
+  
+  associated_methods do
+    def full_name
+      "#{comment_author.first_name} #{comment_author.last_name}"
+    end
+  end
+end
+
+full_name = Post.recent.preload(:top_comments).extending(TopComments).first.full_name
+```
+
+Model instance can be extendend as well:
+```ruby
+post = Post.last
+post.extend(TopComments)
+full_name = post.full_name
+```
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/[USERNAME]/associated_scope.
+Bug reports and pull requests are welcome on GitHub at https://github.com/2rba/associated_scope
 
 ## License
 
