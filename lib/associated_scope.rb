@@ -27,12 +27,16 @@ module AssociatedScope
         source = args[:source]
         reflection = klass._reflect_on_association(source)
         raise AssociationNotFoundError.new(self, source) unless reflection
-
         reflection = reflection.dup
+        reflection.klass # to build class
         parent_scope = reflection.scope
         associated_scope_arg = args[:scope]
         myscope = proc do
-          instance_exec(&parent_scope).merge!(instance_exec(&associated_scope_arg))
+          if parent_scope
+            instance_exec(&parent_scope).merge!(instance_exec(&associated_scope_arg))
+          else
+            instance_exec(&associated_scope_arg)
+          end
         end
         reflection.define_singleton_method(:name) do
           name
@@ -67,7 +71,7 @@ module AssociatedScope
           end
         end
 
-        record.instance_eval(&associated_methods)
+        record.instance_eval(&associated_methods) if associated_methods
       end
 
       if base.is_a?(ActiveRecord::Base)

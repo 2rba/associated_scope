@@ -1,7 +1,13 @@
 # AssociatedScope
-###Preloadable and reusable ActiveRecord scope
 
-Associated scope allow to define ActiveRecord associations outside models as extention to an existing model associations.
+This gem allows to define ActiveRecord scope (relation) what can be eager loaded like model association
+
+###WHY
+To solve N+1 query issues.
+Solving N+1 queries for custom relations might be a complicated task
+
+###WHAT
+Associated scope allow to define ActiveRecord associations as extention for an existing model associations.
 
 ```ruby
 class Post < ApplicationRecord
@@ -11,27 +17,14 @@ end
 module TopComments
   include AssociatedScope
   
-  associated_scope :top_comments, -> { rated.order('score DESC') }, source: :comments
-end
-
-class HomeController < ApplicationController
-  def index
-    @posts = Post.recent.preload(:top_comments).extending(TopComments)
-  end
+  associated_scope :top_comments, -> { order('score DESC') }, source: :comments
 end
 
 # home.html.erb
-<% @posts.each do |post| %>
+<% Post.preload(:top_comments).extending(TopComments).each do |post| %>
   <% post.top_comments.each {...} %>
 <% end %>
 ```
-
-#### WHY
-Solving N+1 queries for custom scopes might be a complicated task. Same time ActiveRecord has a built in preloader.
-
-#### WHAT
-AssociatedScope allow to define preloadable association with a scope.
-
 
 ## Installation
 
@@ -55,7 +48,7 @@ define a module as:
 class TopComments
   include AssociatedScope
   
-  associated_scope :top_comments, -> { rated.order('score DESC') }, source: :comments
+  associated_scope :top_comments, -> { order('score DESC') }, source: :comments
 end
 ```
 
