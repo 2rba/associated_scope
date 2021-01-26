@@ -26,11 +26,22 @@ module AssociatedScope
       associated_scope_args.each do |name, args|
         source = args[:source]
         reflection = klass._reflect_on_association(source)
-        raise AssociationNotFoundError.new(self, source) unless reflection
-        reflection = reflection.dup
+        raise ActiveRecord::AssociationNotFoundError.new(self, source) unless reflection
+        p "original: #{reflection.object_id}"
+        reflection.source_reflection
         reflection.klass # to build class
-        parent_scope = reflection.scope
+        reflection = reflection.dup
+        p "dup: #{reflection.object_id}"
+        delegate_reflection = reflection
+        if reflection.is_a? ActiveRecord::Reflection::ThroughReflection
+          reflection.define_singleton_method(:check_validity!) {}
+          delegate_reflection = reflection.send(:delegate_reflection).dup
+          reflection.instance_variable_set(:@delegate_reflection, delegate_reflection)
+        end
+        # byebug
+        parent_scope = delegate_reflection.scope
         associated_scope_arg = args[:scope]
+
         myscope = proc do
           if parent_scope
             instance_exec(&parent_scope).merge!(instance_exec(&associated_scope_arg))
@@ -41,7 +52,7 @@ module AssociatedScope
         reflection.define_singleton_method(:name) do
           name
         end
-        reflection.define_singleton_method(:scope) do
+        delegate_reflection.define_singleton_method(:scope) do
           myscope
         end
 

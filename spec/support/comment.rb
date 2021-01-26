@@ -5,6 +5,7 @@ ActiveRecord::Schema.define do
     t.integer :post_id
     t.integer :user_id
     t.string :body
+    t.boolean :approved
   end
 end
 
