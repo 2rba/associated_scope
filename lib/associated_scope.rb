@@ -27,11 +27,9 @@ module AssociatedScope
         source = args[:source]
         reflection = klass._reflect_on_association(source)
         raise ActiveRecord::AssociationNotFoundError.new(self, source) unless reflection
-        p "original: #{reflection.object_id}"
         reflection.source_reflection
         reflection.klass # to build class
         reflection = reflection.dup
-        p "dup: #{reflection.object_id}"
         delegate_reflection = reflection
         if reflection.is_a? ActiveRecord::Reflection::ThroughReflection
           reflection.define_singleton_method(:check_validity!) {

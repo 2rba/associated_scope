@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-RSpec.describe 'scope for has_many' do
+RSpec.describe 'scope for has_many through' do
   subject(:first_category) { Category.all.extend(good_comments_module).first }
 
   let(:good_comments_module) do
@@ -31,7 +31,7 @@ RSpec.describe 'scope for has_many' do
   context 'with preload' do
     subject(:first_category) { Category.all.extend(good_comments_module).preload(:good_comments).first }
 
-    it 'filter using associated scope' do
+    it 'preload associated scope' do
       expect(first_category.good_comments).to be_loaded
       expect(first_category.good_comments).to match([good_comment])
       expect(first_category.comments).not_to be_loaded
@@ -39,12 +39,7 @@ RSpec.describe 'scope for has_many' do
   end
 
 
-  context 'when association scope present' do
-    # subject(:good_approved_comments) do
-    #   # Post.all.extend(good_comments_module).preload(:good_admin_comments).first.good_admin_comments
-    #   first_category.approved_comments
-    # end
-
+  context 'when parent scope present' do
     subject(:first_category) { Category.all.extend(good_comments_module).first }
 
     let(:good_approved_comment) { create(:comment, post: post, approved: true, body: 'good') }
@@ -66,23 +61,11 @@ RSpec.describe 'scope for has_many' do
     context 'with preload' do
       subject(:first_category) { Category.all.extend(good_comments_module).preload(:good_approved_comments).first } # .extend(good_comments_module)
 
-      it 'filter using associated scope with preload' do
+      it 'preload associated scope' do
         expect(first_category.good_approved_comments).to be_loaded
         expect(first_category.good_approved_comments).to match([good_approved_comment])
         expect(first_category.approved_comments).not_to be_loaded
       end
     end
-
-    # context 'with model instance' do
-    #   it 'has associated scopes' do
-    #     post.extend(good_comments_module)
-    #
-    #     expect(good_comments.size).to eq(2)
-    #     expect(good_comments).to match([good_comment, good_admin_comment])
-    #
-    #     expect(post.good_admin_comments.size).to eq(1)
-    #     expect(post.good_admin_comments.first).to eq(good_admin_comment)
-    #   end
-    # end
   end
 end

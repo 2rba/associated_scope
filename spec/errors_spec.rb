@@ -14,7 +14,7 @@ RSpec.describe 'scope for has_many' do
       end
     end
 
-    it '' do
+    it 'raise an error' do
       expect { good_comments }.to raise_error(
         ActiveRecord::AssociationNotFoundError,
         "Association named 'bad_comments' was not found on Module; perhaps you misspelled it?"
