@@ -75,7 +75,6 @@ module AssociatedScope
           association = reflection.association_class.new(self, reflection)
 
           association_instance_set(name, association)
-          association.association_scope
           association
         end
 
