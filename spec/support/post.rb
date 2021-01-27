@@ -10,7 +10,7 @@ end
 
 class Post < ActiveRecord::Base
   belongs_to :category
-  has_many :comments
+  has_many :comments, inverse_of: :post
   has_many :admin_comments, ->{ joins(:user).where(users: {name: 'admin'}) }, class_name: '::Comment'
 end
 

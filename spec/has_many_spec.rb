@@ -2,9 +2,10 @@
 
 RSpec.describe 'scope for has_many' do
   subject(:good_comments) do
-    Post.all.extend(good_comments_module).first.good_comments
+    first_post.good_comments
   end
 
+  let(:first_post) { Post.all.extend(good_comments_module).first }
   let(:good_comments_module) do
     Module.new do
       include AssociatedScope
@@ -24,10 +25,11 @@ RSpec.describe 'scope for has_many' do
   end
 
   it 'filter using associated scope' do
-    expect(Post.first.comments).to match([good_comment, bad_comment])
     # expect(good_comments).to be_loaded
     expect(good_comments.size).to eq(1)
     expect(good_comments.first).to eq(good_comment)
+    expect(Post.first.comments).to match([good_comment, bad_comment])
+    expect(first_post.comments).not_to be_loaded
   end
 
   context 'with preload' do
@@ -39,6 +41,7 @@ RSpec.describe 'scope for has_many' do
       expect(good_comments).to be_loaded
       expect(good_comments.size).to eq(1)
       expect(good_comments.first).to eq(good_comment)
+      expect(first_post.comments).not_to be_loaded
     end
   end
 
@@ -60,6 +63,7 @@ RSpec.describe 'scope for has_many' do
       expect(Post.first.admin_comments).to match([good_admin_comment, bad_admin_comment])
       expect(good_admin_comments.size).to eq(1)
       expect(good_admin_comments.first).to eq(good_admin_comment)
+      expect(first_post.admin_comments).not_to be_loaded
     end
 
     context 'with preload' do
@@ -72,6 +76,7 @@ RSpec.describe 'scope for has_many' do
         expect(good_admin_comments).to be_loaded
         expect(good_admin_comments.size).to eq(1)
         expect(good_admin_comments.first).to eq(good_admin_comment)
+        expect(first_post.admin_comments).not_to be_loaded
       end
     end
 

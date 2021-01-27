@@ -34,7 +34,12 @@ module AssociatedScope
         p "dup: #{reflection.object_id}"
         delegate_reflection = reflection
         if reflection.is_a? ActiveRecord::Reflection::ThroughReflection
-          reflection.define_singleton_method(:check_validity!) {}
+          reflection.define_singleton_method(:check_validity!) {
+            begin
+              super()
+            rescue ::ArgumentError
+            end
+          }
           delegate_reflection = reflection.send(:delegate_reflection).dup
           reflection.instance_variable_set(:@delegate_reflection, delegate_reflection)
         end

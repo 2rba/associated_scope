@@ -25,6 +25,7 @@ RSpec.describe 'scope for has_many' do
   it 'filter using associated scope' do
     expect(first_category.good_comments).to match([good_comment])
     expect(Category.first.comments).to match([good_comment, bad_comment])
+    expect(first_category.comments).not_to be_loaded
   end
 
   context 'with preload' do
@@ -33,6 +34,7 @@ RSpec.describe 'scope for has_many' do
     it 'filter using associated scope' do
       expect(first_category.good_comments).to be_loaded
       expect(first_category.good_comments).to match([good_comment])
+      expect(first_category.comments).not_to be_loaded
     end
   end
 
@@ -56,6 +58,7 @@ RSpec.describe 'scope for has_many' do
     it 'preserves scope from model' do
       expect(first_category.good_approved_comments).not_to be_loaded
       expect(first_category.good_approved_comments).to match([good_approved_comment])
+      expect(first_category.approved_comments).not_to be_loaded
       expect(first_category.approved_comments).to match([good_approved_comment, bad_approved_comment])
       expect(Category.first.approved_comments).to match([good_approved_comment, bad_approved_comment])
     end
@@ -66,6 +69,7 @@ RSpec.describe 'scope for has_many' do
       it 'filter using associated scope with preload' do
         expect(first_category.good_approved_comments).to be_loaded
         expect(first_category.good_approved_comments).to match([good_approved_comment])
+        expect(first_category.approved_comments).not_to be_loaded
       end
     end
 
